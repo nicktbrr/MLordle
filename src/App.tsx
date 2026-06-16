@@ -5,7 +5,8 @@ import Round2Technique from './components/Round2Technique';
 import Round3Diagnose from './components/Round3Diagnose';
 import Round4Tool from './components/Round4Tool';
 import Results from './components/Results';
-import Toast, { praiseFor, type ToastMessage } from './components/Toast';
+import Toast from './components/Toast';
+import { praiseFor, type ToastMessage } from './components/praise';
 import { getContentRepository } from './data/contentRepository';
 import { getDailyStats, submitResult, type DailyStats } from './data/statsRepository';
 import { isSupabaseConfigured } from './lib/supabase';
@@ -29,7 +30,9 @@ export default function App() {
   const dateKey = useMemo(() => todayKey(), []);
   const { results, saveDay } = useProgress();
 
-  const [view, setView] = useState<Phase>('round1');
+  // If today was already finished in an earlier session, open straight to the
+  // recap; otherwise start at round 1.
+  const [view, setView] = useState<Phase>(() => (results[dateKey] ? 'results' : 'round1'));
   const [outcomes, setOutcomes] = useState<Outcomes>({});
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [stats, setStats] = useState<DailyStats | null>(null);
@@ -58,18 +61,13 @@ export default function App() {
   const savedToday = results[dateKey];
   const streak = computeStreak(results, dateKey);
 
-  // Reloaded after finishing earlier today: go straight to the results recap.
-  useEffect(() => {
-    if (savedToday) setView('results');
-  }, [savedToday]);
-
   // On the results screen, submit this browser's result (idempotent) and load
   // the community stats for the day.
   useEffect(() => {
     if (view !== 'results' || !savedToday || !isSupabaseConfigured) return;
     let active = true;
-    setStatsLoading(true);
     (async () => {
+      setStatsLoading(true);
       try {
         await submitResult(savedToday);
         const s = await getDailyStats(dateKey);

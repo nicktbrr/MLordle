@@ -13,7 +13,7 @@ function summaryLine(label: string, o: RoundOutcome): string {
   return `${o.solved ? '✅' : '❌'} ${label} (${o.attempts}/6)`;
 }
 
-export function buildShareText(result: DayResult, streak: number): string {
+function buildShareText(result: DayResult, streak: number): string {
   return [
     `MLordle — ${result.dateKey}`,
     ...ROUND_LABELS.map(([k, label]) => summaryLine(label, result[k])),
