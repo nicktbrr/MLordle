@@ -7,6 +7,9 @@ export interface Stage {
   description: string;
 }
 
+/** A directed connection in the correct system diagram: [from stage id, to stage id]. */
+export type StageEdge = [string, string];
+
 export interface Scenario {
   id: string;
   title: string;
@@ -14,6 +17,12 @@ export interface Scenario {
   description: string;
   ordered_stage_ids: string[];
   decoy_stage_ids: string[];
+  /**
+   * The correct directed connections between stages. May contain cycles (e.g. a
+   * monitoring → retraining loop for continuous deployment). When absent, the
+   * pipeline is treated as a simple linear chain through `ordered_stage_ids`.
+   */
+  edges?: StageEdge[];
 }
 
 export type Modality = 'image' | 'text' | 'tabular' | 'audio' | 'any';

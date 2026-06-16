@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { fallbackContent } from '../data/fallbackContent';
 import { buildDailyPuzzle, todayKey } from './daily';
-import { evaluateRound1 } from './round1';
+import { evaluateRound1Graph } from './round1';
+import type { StageEdge } from '../data/types';
 import { evaluateRound2Guess } from './round2';
 import { evaluateRound3Guess } from './round3';
 
@@ -41,26 +42,67 @@ describe('daily puzzle selection', () => {
   });
 });
 
-describe('evaluateRound1', () => {
-  const answer = ['a', 'b', 'c'];
-  const decoys = ['x'];
+describe('evaluateRound1Graph', () => {
+  // Answer graph with a cycle: a → b → c → a
+  const answer = { nodeIds: ['a', 'b', 'c'], edges: [['a', 'b'], ['b', 'c'], ['c', 'a']] as StageEdge[] };
 
-  it('marks a perfect order solved with all greens (decoy absent)', () => {
-    const r = evaluateRound1(['a', 'b', 'c', 'x'], answer, decoys);
+  it('solves when nodes and directed edges match exactly (cycle included)', () => {
+    const r = evaluateRound1Graph(
+      { nodeIds: ['a', 'b', 'c'], edges: [['a', 'b'], ['b', 'c'], ['c', 'a']] },
+      answer,
+    );
     expect(r.solved).toBe(true);
-    expect(r.statuses).toEqual(['correct', 'correct', 'correct', 'absent']);
+    expect(Object.values(r.nodeStatus)).toEqual(['correct', 'correct', 'correct']);
+    expect(r.missingEdges).toEqual([]);
   });
 
-  it('solves even when a decoy is interleaved (relative order intact)', () => {
-    const r = evaluateRound1(['a', 'x', 'b', 'c'], answer, decoys);
-    expect(r.solved).toBe(true);
-    expect(r.statuses).toEqual(['correct', 'absent', 'correct', 'correct']);
-  });
-
-  it('flags wrong-position real stages as present', () => {
-    const r = evaluateRound1(['b', 'a', 'c', 'x'], answer, decoys);
+  it('is not solved if the cycle edge is missing', () => {
+    const r = evaluateRound1Graph(
+      { nodeIds: ['a', 'b', 'c'], edges: [['a', 'b'], ['b', 'c']] },
+      answer,
+    );
     expect(r.solved).toBe(false);
-    expect(r.statuses).toEqual(['present', 'present', 'correct', 'absent']);
+    expect(r.missingEdges).toEqual([['c', 'a']]);
+    // a and c touch the missing edge -> yellow; b is fully wired -> green
+    expect(r.nodeStatus.a).toBe('present');
+    expect(r.nodeStatus.b).toBe('correct');
+    expect(r.nodeStatus.c).toBe('present');
+  });
+
+  it('marks a node that does not belong as absent and the edge to it as wrong', () => {
+    const r = evaluateRound1Graph(
+      { nodeIds: ['a', 'b', 'c', 'x'], edges: [['a', 'b'], ['b', 'c'], ['c', 'a'], ['a', 'x']] },
+      answer,
+    );
+    expect(r.solved).toBe(false);
+    expect(r.nodeStatus.x).toBe('absent');
+    expect(r.edgeStatus['a->x']).toBe('absent');
+    expect(r.edgeStatus['a->b']).toBe('correct');
+  });
+
+  it('reports nodes the player never placed as missing', () => {
+    const r = evaluateRound1Graph({ nodeIds: ['a', 'b'], edges: [['a', 'b']] }, answer);
+    expect(r.missingNodeIds).toEqual(['c']);
+    expect(r.solved).toBe(false);
+  });
+
+  it('treats direction as significant (b→a is wrong when answer is a→b)', () => {
+    const r = evaluateRound1Graph(
+      { nodeIds: ['a', 'b', 'c'], edges: [['b', 'a'], ['b', 'c'], ['c', 'a']] },
+      answer,
+    );
+    expect(r.edgeStatus['b->a']).toBe('absent');
+    expect(r.solved).toBe(false);
+  });
+});
+
+describe('daily puzzle Round 1 edges', () => {
+  it('exposes directed edges and includes a retraining cycle for monitored scenarios', () => {
+    const p = buildDailyPuzzle(fallbackContent, '2026-06-16');
+    expect(p.round1Edges.length).toBeGreaterThan(0);
+    if (p.round1Answer.includes('monitoring')) {
+      expect(p.round1Edges).toContainEqual(['monitoring', 'model-training']);
+    }
   });
 });
 

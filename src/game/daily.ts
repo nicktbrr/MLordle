@@ -1,11 +1,12 @@
-import type { Cause, Content, Scenario, Stage, Symptom, Technique } from '../data/types';
+import type { Cause, Content, Scenario, Stage, StageEdge, Symptom, Technique } from '../data/types';
 
 export interface DailyPuzzle {
   dateKey: string;
   scenario: Scenario;
-  // Round 1 — order the stages
+  // Round 1 — build the system diagram
   round1Stages: Stage[]; // ordered stages + decoys, deterministically shuffled
-  round1Answer: string[]; // correct ordered stage ids
+  round1Answer: string[]; // stage ids that belong in the diagram (the node set)
+  round1Edges: StageEdge[]; // correct directed connections (may contain cycles)
   round1DecoyIds: string[]; // stage ids that don't belong
   // Round 2 — technique-dle
   round2Stage: Stage;
@@ -81,6 +82,12 @@ export function buildDailyPuzzle(content: Content, dateKey: string): DailyPuzzle
   const scenario = scenarios[seed % scenarios.length];
   const round1Answer = scenario.ordered_stage_ids;
   const round1DecoyIds = scenario.decoy_stage_ids;
+  // Authoritative connections: explicit edges if provided, else a linear chain
+  // through the ordered stages.
+  const round1Edges: StageEdge[] =
+    scenario.edges && scenario.edges.length > 0
+      ? scenario.edges
+      : round1Answer.slice(0, -1).map((id, i) => [id, round1Answer[i + 1]] as StageEdge);
   const round1Stages = shuffle(
     [...round1Answer, ...round1DecoyIds]
       .map((id) => stageById.get(id))
@@ -116,6 +123,7 @@ export function buildDailyPuzzle(content: Content, dateKey: string): DailyPuzzle
     scenario,
     round1Stages,
     round1Answer,
+    round1Edges,
     round1DecoyIds,
     round2Stage,
     round2Answer,

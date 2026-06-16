@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Header from './components/Header';
-import Round1Order from './components/Round1Order';
+import Round1Graph from './components/Round1Graph';
 import Round2Technique from './components/Round2Technique';
 import Round3Diagnose from './components/Round3Diagnose';
 import Results from './components/Results';
@@ -168,8 +168,9 @@ export default function App() {
 
       <main className="stage">
         <div hidden={view !== 'round1'}>
-          <Round1Order
+          <Round1Graph
             puzzle={puzzle}
+            allStages={content?.stages ?? []}
             onComplete={(o) => recordOutcome('round1', o)}
             onNext={() => goNext('round1')}
           />
