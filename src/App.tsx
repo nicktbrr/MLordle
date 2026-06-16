@@ -83,12 +83,17 @@ export default function App() {
     };
   }, [view, savedToday, dateKey]);
 
+  // True when today was finished in an earlier session (reloaded recap): lock the
+  // rounds so a replay can't overwrite the saved result; only the recap is viewable.
+  const reloadedRecap = Boolean(savedToday) && !outcomes.round1 && !outcomes.round2 && !outcomes.round3;
+
   // A round can be viewed once the previous one is done; results once all 3 are.
   function isUnlocked(target: Phase): boolean {
+    if (reloadedRecap) return target === 'results';
     if (target === 'round1') return true;
     if (target === 'round2') return Boolean(outcomes.round1);
     if (target === 'round3') return Boolean(outcomes.round2);
-    return Boolean(outcomes.round3) || Boolean(savedToday);
+    return Boolean(outcomes.round3);
   }
 
   function recordOutcome(round: (typeof ROUNDS)[number], o: RoundOutcome) {

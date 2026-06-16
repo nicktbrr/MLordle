@@ -18,10 +18,14 @@ export default function Round3Diagnose({
   puzzle,
   stageName,
   onComplete,
+  onNext,
+  nextLabel = 'Next question →',
 }: {
   puzzle: DailyPuzzle;
   stageName: (id: string) => string;
   onComplete: (o: RoundOutcome) => void;
+  onNext: () => void;
+  nextLabel?: string;
 }) {
   const [query, setQuery] = useState('');
   const [guesses, setGuesses] = useState<Round3Guess[]>([]);
@@ -73,7 +77,6 @@ export default function Round3Diagnose({
             placeholder="Name the cause… (e.g. Data Drift, Overfitting)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            autoFocus
           />
           {suggestions.length > 0 && (
             <ul className="combo__list">
@@ -107,16 +110,23 @@ export default function Round3Diagnose({
         ))}
       </ul>
 
+      {finished && (
+        <div className="reveal">
+          <p className={`round__verdict ${solved ? 'is-win' : 'is-loss'}`}>
+            {solved ? `Correct — ${puzzle.round3Answer.name}! 🎯` : 'Out of guesses.'}
+          </p>
+          <p className="reveal__label">Cause: {puzzle.round3Answer.name}</p>
+        </div>
+      )}
+
       <div className="round__foot">
         <span className="round__counter">
           {Math.min(guesses.length + (finished ? 0 : 1), MAX_GUESSES)} / {MAX_GUESSES}
         </span>
         {finished && (
-          <p className={`round__verdict ${solved ? 'is-win' : 'is-loss'}`}>
-            {solved
-              ? `Correct — ${puzzle.round3Answer.name}! 🎯`
-              : `The cause was ${puzzle.round3Answer.name}.`}
-          </p>
+          <button className="btn" onClick={onNext}>
+            {nextLabel}
+          </button>
         )}
       </div>
     </section>

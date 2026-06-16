@@ -139,17 +139,38 @@ export default function Round1Order({
         </SortableContext>
       </DndContext>
 
+      {finished && (
+        <div className="reveal">
+          <p className={`round__verdict ${solved ? 'is-win' : 'is-loss'}`}>
+            {solved ? 'Pipeline solved! 🟩' : 'Out of attempts.'}
+          </p>
+          <p className="reveal__label">Correct pipeline</p>
+          <ol className="reveal__order">
+            {puzzle.round1Answer.map((id) => (
+              <li key={id}>{nameById.get(id) ?? id}</li>
+            ))}
+          </ol>
+          {puzzle.round1DecoyIds.length > 0 && (
+            <p className="reveal__note">
+              Not part of this pipeline:{' '}
+              {puzzle.round1DecoyIds.map((id) => nameById.get(id) ?? id).join(', ')}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="round__foot">
-        <span className="round__counter">Attempt {Math.min(attempts + (finished ? 0 : 1), MAX_ATTEMPTS)} / {MAX_ATTEMPTS}</span>
-        {!finished && (
+        <span className="round__counter">
+          Attempt {Math.min(attempts + (finished ? 0 : 1), MAX_ATTEMPTS)} / {MAX_ATTEMPTS}
+        </span>
+        {!finished ? (
           <button className="btn" onClick={submit}>
             Check order
           </button>
-        )}
-        {finished && (
-          <p className={`round__verdict ${solved ? 'is-win' : 'is-loss'}`}>
-            {solved ? 'Pipeline solved! 🟩' : 'Out of attempts — see the colors above.'}
-          </p>
+        ) : (
+          <button className="btn" onClick={onNext}>
+            {nextLabel}
+          </button>
         )}
       </div>
     </section>

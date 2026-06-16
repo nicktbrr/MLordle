@@ -10,9 +10,13 @@ const MAX_GUESSES = 6;
 export default function Round2Technique({
   puzzle,
   onComplete,
+  onNext,
+  nextLabel = 'Next question →',
 }: {
   puzzle: DailyPuzzle;
   onComplete: (o: RoundOutcome) => void;
+  onNext: () => void;
+  nextLabel?: string;
 }) {
   const [query, setQuery] = useState('');
   const [guesses, setGuesses] = useState<Round2Guess[]>([]);
@@ -66,7 +70,6 @@ export default function Round2Technique({
             placeholder="Type a technique… (e.g. MixUp, SMOTE, Dropout)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            autoFocus
           />
           {suggestions.length > 0 && (
             <ul className="combo__list">
@@ -98,16 +101,23 @@ export default function Round2Technique({
         ))}
       </ul>
 
+      {finished && (
+        <div className="reveal">
+          <p className={`round__verdict ${solved ? 'is-win' : 'is-loss'}`}>
+            {solved ? `Correct — ${puzzle.round2Answer.name}! 🟩` : 'Out of guesses.'}
+          </p>
+          <p className="reveal__label">Answer: {puzzle.round2Answer.name}</p>
+        </div>
+      )}
+
       <div className="round__foot">
         <span className="round__counter">
           {Math.min(guesses.length + (finished ? 0 : 1), MAX_GUESSES)} / {MAX_GUESSES}
         </span>
         {finished && (
-          <p className={`round__verdict ${solved ? 'is-win' : 'is-loss'}`}>
-            {solved
-              ? `Correct — ${puzzle.round2Answer.name}! 🟩`
-              : `The answer was ${puzzle.round2Answer.name}.`}
-          </p>
+          <button className="btn" onClick={onNext}>
+            {nextLabel}
+          </button>
         )}
       </div>
     </section>
