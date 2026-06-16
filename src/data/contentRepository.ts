@@ -6,7 +6,7 @@ export interface ContentRepository {
   getContent(): Promise<Content>;
 }
 
-/** Reads all content tables from Supabase via the anon key (read-only RLS). */
+/** Reads all content tables from Supabase via the publishable key (read-only RLS). */
 export class SupabaseContentRepository implements ContentRepository {
   async getContent(): Promise<Content> {
     const [stages, scenarios, techniques, causes, symptoms] = await Promise.all([

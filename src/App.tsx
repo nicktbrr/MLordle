@@ -133,7 +133,7 @@ export default function App() {
       {!isSupabaseConfigured && (
         <footer className="banner">
           Running on bundled demo content — set <code>VITE_SUPABASE_URL</code> and{' '}
-          <code>VITE_SUPABASE_ANON_KEY</code> to load from Supabase.
+          <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> to load from Supabase.
         </footer>
       )}
     </div>

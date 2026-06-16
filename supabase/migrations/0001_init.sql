@@ -60,3 +60,8 @@ create policy "public read scenarios"  on scenarios  for select to anon, authent
 create policy "public read techniques" on techniques for select to anon, authenticated using (true);
 create policy "public read causes"     on causes     for select to anon, authenticated using (true);
 create policy "public read symptoms"   on symptoms   for select to anon, authenticated using (true);
+
+-- Table-level SELECT privilege for the client roles. RLS policies decide which
+-- rows are visible, but the role still needs this GRANT to read the table at all.
+grant usage on schema public to anon, authenticated;
+grant select on stages, scenarios, techniques, causes, symptoms to anon, authenticated;
