@@ -61,12 +61,16 @@ function SortableTile({
 export default function Round1Order({
   puzzle,
   onComplete,
+  onNext,
+  nextLabel = 'Next question →',
 }: {
   puzzle: DailyPuzzle;
   onComplete: (o: RoundOutcome) => void;
+  onNext: () => void;
+  nextLabel?: string;
 }) {
   const nameById = useMemo(
-    () => new Map(puzzle.round1Stages.map((s) => [s.id, s.name])),
+    () => new Map([...puzzle.round1Stages].map((s) => [s.id, s.name])),
     [puzzle],
   );
   const [order, setOrder] = useState<string[]>(() => puzzle.round1Stages.map((s) => s.id));
