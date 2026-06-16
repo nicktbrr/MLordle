@@ -6,9 +6,11 @@ export interface DailyStats {
   round1_solve_rate: number; // 0..1
   round2_solve_rate: number;
   round3_solve_rate: number;
+  round4_solve_rate: number;
   avg_round1_attempts: number;
   avg_round2_attempts: number;
   avg_round3_attempts: number;
+  avg_round4_attempts: number;
   dist_rounds_solved: Record<string, number> | null; // { "0": n, "1": n, ... }
 }
 
@@ -36,7 +38,11 @@ export async function submitResult(result: DayResult): Promise<void> {
     p_round2_attempts: result.round2.attempts,
     p_round3_solved: result.round3.solved,
     p_round3_attempts: result.round3.attempts,
-    p_rounds_solved: [result.round1, result.round2, result.round3].filter((r) => r.solved).length,
+    p_round4_solved: result.round4.solved,
+    p_round4_attempts: result.round4.attempts,
+    p_rounds_solved: [result.round1, result.round2, result.round3, result.round4].filter(
+      (r) => r.solved,
+    ).length,
   });
   if (error) throw new Error(error.message);
 }

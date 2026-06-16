@@ -70,6 +70,43 @@ export interface Symptom {
   stage_id: string;
 }
 
+// ---- Round 4: tooling ----
+export type ToolCategory =
+  | 'experiment-tracking'
+  | 'vector-db'
+  | 'database'
+  | 'data-versioning'
+  | 'orchestration'
+  | 'serving'
+  | 'feature-store'
+  | 'monitoring'
+  | 'labeling'
+  | 'model-hub'
+  | 'compute';
+export type ToolHosting = 'open-source' | 'managed' | 'both';
+export type ToolInterface = 'library' | 'platform' | 'database' | 'cli';
+
+export interface ToolAttributes {
+  category: ToolCategory;
+  lifecycle_stage: string; // a Stage id
+  hosting: ToolHosting;
+  interface: ToolInterface;
+}
+
+export interface Tool {
+  id: string;
+  name: string;
+  aliases: string[];
+  attributes: ToolAttributes;
+}
+
+/** A "what tool fits this need?" prompt that resolves to one tool. */
+export interface ToolPrompt {
+  id: string;
+  description: string;
+  tool_id: string;
+}
+
 /** Everything the game needs, loaded once. */
 export interface Content {
   stages: Stage[];
@@ -77,4 +114,6 @@ export interface Content {
   techniques: Technique[];
   causes: Cause[];
   symptoms: Symptom[];
+  tools: Tool[];
+  toolPrompts: ToolPrompt[];
 }

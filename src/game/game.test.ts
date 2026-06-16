@@ -5,6 +5,7 @@ import { evaluateRound1Graph } from './round1';
 import type { StageEdge } from '../data/types';
 import { evaluateRound2Guess } from './round2';
 import { evaluateRound3Guess } from './round3';
+import { evaluateRound4Guess } from './round4';
 
 const stageName = (id: string) =>
   fallbackContent.stages.find((s) => s.id === id)?.name ?? id;
@@ -152,5 +153,44 @@ describe('evaluateRound3Guess', () => {
   it('is cold when nothing matches', () => {
     const g = evaluateRound3Guess(find('overfitting'), find('data-drift'), stageName);
     expect(g.warmth).toBe('cold');
+  });
+});
+
+describe('evaluateRound4Guess', () => {
+  const find = (id: string) => fallbackContent.tools.find((t) => t.id === id)!;
+
+  it('is correct + correct warmth for the exact tool', () => {
+    const mlflow = find('mlflow');
+    const g = evaluateRound4Guess(mlflow, mlflow, stageName);
+    expect(g.correct).toBe(true);
+    expect(g.warmth).toBe('correct');
+    expect(g.attrs).toHaveLength(4);
+    expect(g.attrs.every((a) => a.status === 'correct')).toBe(true);
+  });
+
+  it('is hot when 3 of 4 attributes match', () => {
+    // Milvus vs Weaviate: same category/stage/interface, hosting differs
+    const g = evaluateRound4Guess(find('milvus'), find('weaviate'), stageName);
+    expect(g.correct).toBe(false);
+    expect(g.warmth).toBe('hot');
+  });
+
+  it('is warm when some but few attributes match', () => {
+    // MLflow vs Ray: same lifecycle stage + interface only
+    const g = evaluateRound4Guess(find('mlflow'), find('ray'), stageName);
+    expect(g.warmth).toBe('warm');
+  });
+
+  it('is cold when nothing matches', () => {
+    const g = evaluateRound4Guess(find('mlflow'), find('pinecone'), stageName);
+    expect(g.warmth).toBe('cold');
+  });
+});
+
+describe('daily puzzle Round 4', () => {
+  it('answer matches the prompt tool and the pool holds every tool', () => {
+    const p = buildDailyPuzzle(fallbackContent, '2026-07-01');
+    expect(p.round4Answer.id).toBe(p.round4Prompt.tool_id);
+    expect(p.round4Pool).toHaveLength(fallbackContent.tools.length);
   });
 });

@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Round1Graph from './components/Round1Graph';
 import Round2Technique from './components/Round2Technique';
 import Round3Diagnose from './components/Round3Diagnose';
+import Round4Tool from './components/Round4Tool';
 import Results from './components/Results';
 import Toast, { praiseFor, type ToastMessage } from './components/Toast';
 import { getContentRepository } from './data/contentRepository';
@@ -12,13 +13,14 @@ import type { Content } from './data/types';
 import { buildDailyPuzzle, todayKey, type DailyPuzzle } from './game/daily';
 import { computeStreak, useProgress, type RoundOutcome } from './state/progress';
 
-type Phase = 'round1' | 'round2' | 'round3' | 'results';
-const ROUNDS = ['round1', 'round2', 'round3'] as const;
+type Phase = 'round1' | 'round2' | 'round3' | 'round4' | 'results';
+const ROUNDS = ['round1', 'round2', 'round3', 'round4'] as const;
 
 interface Outcomes {
   round1?: RoundOutcome;
   round2?: RoundOutcome;
   round3?: RoundOutcome;
+  round4?: RoundOutcome;
 }
 
 export default function App() {
@@ -85,27 +87,35 @@ export default function App() {
 
   // True when today was finished in an earlier session (reloaded recap): lock the
   // rounds so a replay can't overwrite the saved result; only the recap is viewable.
-  const reloadedRecap = Boolean(savedToday) && !outcomes.round1 && !outcomes.round2 && !outcomes.round3;
+  const reloadedRecap =
+    Boolean(savedToday) &&
+    !outcomes.round1 &&
+    !outcomes.round2 &&
+    !outcomes.round3 &&
+    !outcomes.round4;
 
-  // A round can be viewed once the previous one is done; results once all 3 are.
+  // Any round is freely navigable at any time, answered or not. Results unlocks
+  // once all four rounds are done. After finishing earlier today (reloaded
+  // recap), everything is locked except the recap so a replay can't overwrite it.
   function isUnlocked(target: Phase): boolean {
     if (reloadedRecap) return target === 'results';
-    if (target === 'round1') return true;
-    if (target === 'round2') return Boolean(outcomes.round1);
-    if (target === 'round3') return Boolean(outcomes.round2);
-    return Boolean(outcomes.round3);
+    if (target === 'results') {
+      return Boolean(outcomes.round1 && outcomes.round2 && outcomes.round3 && outcomes.round4);
+    }
+    return true;
   }
 
   function recordOutcome(round: (typeof ROUNDS)[number], o: RoundOutcome) {
     setToast(praiseFor(o.attempts, o.solved));
     setOutcomes((prev) => {
       const next = { ...prev, [round]: o };
-      if (next.round1 && next.round2 && next.round3) {
+      if (next.round1 && next.round2 && next.round3 && next.round4) {
         saveDay({
           dateKey,
           round1: next.round1,
           round2: next.round2,
           round3: next.round3,
+          round4: next.round4,
           completedAt: new Date().toISOString(),
         });
       }
@@ -113,10 +123,13 @@ export default function App() {
     });
   }
 
-  function goNext(from: Phase) {
-    const order: Phase[] = ['round1', 'round2', 'round3', 'results'];
-    const next = order[order.indexOf(from) + 1];
-    if (next) setView(next);
+  const allAnswered = ROUNDS.every((r) => Boolean(outcomes[r]));
+
+  // Advance to the next round the player hasn't answered yet; only once every
+  // round is done does "Next" lead to the results recap.
+  function goNext() {
+    const nextUnanswered = ROUNDS.find((r) => !outcomes[r]);
+    setView(nextUnanswered ?? 'results');
   }
 
   if (error) {
@@ -151,11 +164,13 @@ export default function App() {
       <nav className="steps" aria-label="rounds">
         {ROUNDS.map((p, i) => {
           const unlocked = isUnlocked(p);
+          const outcome = outcomes[p];
+          const stateClass = outcome ? (outcome.solved ? 'is-done' : 'is-failed') : '';
           return (
             <button
               key={p}
               type="button"
-              className={`steps__dot ${view === p ? 'is-active' : ''} ${outcomes[p] ? 'is-done' : ''}`}
+              className={`steps__dot ${view === p ? 'is-active' : ''} ${stateClass}`}
               disabled={!unlocked}
               aria-current={view === p}
               onClick={() => unlocked && setView(p)}
@@ -172,14 +187,16 @@ export default function App() {
             puzzle={puzzle}
             allStages={content?.stages ?? []}
             onComplete={(o) => recordOutcome('round1', o)}
-            onNext={() => goNext('round1')}
+            onNext={goNext}
+            nextLabel={allAnswered ? 'See results →' : 'Next question →'}
           />
         </div>
         <div hidden={view !== 'round2'}>
           <Round2Technique
             puzzle={puzzle}
             onComplete={(o) => recordOutcome('round2', o)}
-            onNext={() => goNext('round2')}
+            onNext={goNext}
+            nextLabel={allAnswered ? 'See results →' : 'Next question →'}
           />
         </div>
         <div hidden={view !== 'round3'}>
@@ -187,15 +204,24 @@ export default function App() {
             puzzle={puzzle}
             stageName={stageName}
             onComplete={(o) => recordOutcome('round3', o)}
-            onNext={() => goNext('round3')}
-            nextLabel="See results →"
+            onNext={goNext}
+            nextLabel={allAnswered ? 'See results →' : 'Next question →'}
+          />
+        </div>
+        <div hidden={view !== 'round4'}>
+          <Round4Tool
+            puzzle={puzzle}
+            stageName={stageName}
+            onComplete={(o) => recordOutcome('round4', o)}
+            onNext={goNext}
+            nextLabel={allAnswered ? 'See results →' : 'Next question →'}
           />
         </div>
         {view === 'results' && savedToday && (
           <Results
             result={savedToday}
             streak={streak}
-            alreadyPlayed={!outcomes.round3}
+            alreadyPlayed={!outcomes.round4}
             stats={stats}
             statsLoading={statsLoading}
           />

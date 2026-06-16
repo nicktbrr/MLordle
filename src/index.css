@@ -55,6 +55,7 @@ body {
 }
 .steps__dot:disabled { cursor: not-allowed; opacity: 0.5; }
 .steps__dot.is-done { background: var(--green); color: #fff; border-color: var(--green); }
+.steps__dot.is-failed { background: #a85454; color: #fff; border-color: #a85454; }
 .steps__dot.is-active { border-color: var(--accent); color: var(--text); box-shadow: 0 0 0 2px rgba(106,168,255,0.25); }
 
 /* ---------- round shell ---------- */

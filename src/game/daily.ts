@@ -1,4 +1,14 @@
-import type { Cause, Content, Scenario, Stage, StageEdge, Symptom, Technique } from '../data/types';
+import type {
+  Cause,
+  Content,
+  Scenario,
+  Stage,
+  StageEdge,
+  Symptom,
+  Technique,
+  Tool,
+  ToolPrompt,
+} from '../data/types';
 
 export interface DailyPuzzle {
   dateKey: string;
@@ -16,6 +26,10 @@ export interface DailyPuzzle {
   round3Symptom: Symptom;
   round3Answer: Cause;
   round3Pool: Cause[]; // all causes, sorted by name
+  // Round 4 — name the tool
+  round4Prompt: ToolPrompt;
+  round4Answer: Tool;
+  round4Pool: Tool[]; // all tools, sorted by name
 }
 
 /** Local-time date key, e.g. "2026-06-16". */
@@ -70,8 +84,15 @@ function shuffle<T>(items: T[], rng: () => number): T[] {
  * yields the same puzzle. Throws if content is too sparse to assemble a puzzle.
  */
 export function buildDailyPuzzle(content: Content, dateKey: string): DailyPuzzle {
-  const { stages, scenarios, techniques, causes, symptoms } = content;
-  if (!scenarios.length || !symptoms.length || !causes.length || !techniques.length) {
+  const { stages, scenarios, techniques, causes, symptoms, tools, toolPrompts } = content;
+  if (
+    !scenarios.length ||
+    !symptoms.length ||
+    !causes.length ||
+    !techniques.length ||
+    !tools.length ||
+    !toolPrompts.length
+  ) {
     throw new Error('Not enough content to build a daily puzzle.');
   }
 
@@ -118,6 +139,14 @@ export function buildDailyPuzzle(content: Content, dateKey: string): DailyPuzzle
   const round3Answer = causeById.get(round3Symptom.cause_id)!;
   const round3Pool = [...causes].sort((a, b) => a.name.localeCompare(b.name));
 
+  // --- Round 4: pick a tooling prompt ---
+  const toolById = new Map(tools.map((t) => [t.id, t]));
+  const r4Rng = mulberry32(seed ^ 0x27d4eb2f);
+  const answerablePrompts = toolPrompts.filter((p) => toolById.has(p.tool_id));
+  const round4Prompt = pick(answerablePrompts.length ? answerablePrompts : toolPrompts, r4Rng);
+  const round4Answer = toolById.get(round4Prompt.tool_id)!;
+  const round4Pool = [...tools].sort((a, b) => a.name.localeCompare(b.name));
+
   return {
     dateKey,
     scenario,
@@ -131,5 +160,8 @@ export function buildDailyPuzzle(content: Content, dateKey: string): DailyPuzzle
     round3Symptom,
     round3Answer,
     round3Pool,
+    round4Prompt,
+    round4Answer,
+    round4Pool,
   };
 }

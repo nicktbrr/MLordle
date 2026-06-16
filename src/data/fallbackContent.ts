@@ -77,4 +77,72 @@ export const fallbackContent: Content = {
     { id: 'rare-positive', description: 'The fraud model flags almost nothing because positive cases are only 0.2% of the data.', cause_id: 'class-imbalance', stage_id: 'data-gathering' },
     { id: 'preproc-mismatch', description: 'A feature is scaled one way in the training pipeline and a different way in the serving code.', cause_id: 'training-serving-skew', stage_id: 'deployment' },
   ],
+  tools: [
+    // experiment tracking
+    { id: 'mlflow', name: 'MLflow', aliases: [], attributes: { category: 'experiment-tracking', lifecycle_stage: 'model-training', hosting: 'both', interface: 'library' } },
+    { id: 'wandb', name: 'Weights & Biases', aliases: ['wandb', 'w&b'], attributes: { category: 'experiment-tracking', lifecycle_stage: 'model-training', hosting: 'managed', interface: 'platform' } },
+    { id: 'neptune', name: 'Neptune.ai', aliases: ['neptune'], attributes: { category: 'experiment-tracking', lifecycle_stage: 'model-training', hosting: 'managed', interface: 'platform' } },
+    { id: 'comet', name: 'Comet ML', aliases: ['comet'], attributes: { category: 'experiment-tracking', lifecycle_stage: 'model-training', hosting: 'managed', interface: 'platform' } },
+    // vector databases
+    { id: 'pinecone', name: 'Pinecone', aliases: [], attributes: { category: 'vector-db', lifecycle_stage: 'deployment', hosting: 'managed', interface: 'database' } },
+    { id: 'weaviate', name: 'Weaviate', aliases: [], attributes: { category: 'vector-db', lifecycle_stage: 'deployment', hosting: 'both', interface: 'database' } },
+    { id: 'milvus', name: 'Milvus', aliases: [], attributes: { category: 'vector-db', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'database' } },
+    { id: 'chroma', name: 'Chroma', aliases: ['chromadb'], attributes: { category: 'vector-db', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'database' } },
+    { id: 'faiss', name: 'FAISS', aliases: [], attributes: { category: 'vector-db', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'library' } },
+    // general databases / stores
+    { id: 'mongodb', name: 'MongoDB', aliases: ['mongo'], attributes: { category: 'database', lifecycle_stage: 'data-gathering', hosting: 'both', interface: 'database' } },
+    { id: 'postgres', name: 'PostgreSQL', aliases: ['postgres', 'postgresql'], attributes: { category: 'database', lifecycle_stage: 'data-gathering', hosting: 'open-source', interface: 'database' } },
+    { id: 'redis', name: 'Redis', aliases: [], attributes: { category: 'database', lifecycle_stage: 'deployment', hosting: 'both', interface: 'database' } },
+    // data versioning
+    { id: 'dvc', name: 'DVC', aliases: ['data version control'], attributes: { category: 'data-versioning', lifecycle_stage: 'data-gathering', hosting: 'open-source', interface: 'cli' } },
+    { id: 'lakefs', name: 'lakeFS', aliases: [], attributes: { category: 'data-versioning', lifecycle_stage: 'data-gathering', hosting: 'both', interface: 'platform' } },
+    // orchestration
+    { id: 'airflow', name: 'Apache Airflow', aliases: ['airflow'], attributes: { category: 'orchestration', lifecycle_stage: 'data-gathering', hosting: 'open-source', interface: 'platform' } },
+    { id: 'prefect', name: 'Prefect', aliases: [], attributes: { category: 'orchestration', lifecycle_stage: 'data-gathering', hosting: 'both', interface: 'platform' } },
+    { id: 'dagster', name: 'Dagster', aliases: [], attributes: { category: 'orchestration', lifecycle_stage: 'data-gathering', hosting: 'both', interface: 'platform' } },
+    { id: 'kubeflow', name: 'Kubeflow', aliases: [], attributes: { category: 'orchestration', lifecycle_stage: 'model-training', hosting: 'open-source', interface: 'platform' } },
+    // serving
+    { id: 'bentoml', name: 'BentoML', aliases: ['bento'], attributes: { category: 'serving', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'library' } },
+    { id: 'triton', name: 'Triton Inference Server', aliases: ['triton'], attributes: { category: 'serving', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'platform' } },
+    { id: 'seldon', name: 'Seldon Core', aliases: ['seldon'], attributes: { category: 'serving', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'platform' } },
+    { id: 'kserve', name: 'KServe', aliases: [], attributes: { category: 'serving', lifecycle_stage: 'deployment', hosting: 'open-source', interface: 'platform' } },
+    // compute / training
+    { id: 'ray', name: 'Ray', aliases: [], attributes: { category: 'compute', lifecycle_stage: 'model-training', hosting: 'open-source', interface: 'library' } },
+    { id: 'sagemaker', name: 'Amazon SageMaker', aliases: ['sagemaker'], attributes: { category: 'compute', lifecycle_stage: 'model-training', hosting: 'managed', interface: 'platform' } },
+    // feature store
+    { id: 'feast', name: 'Feast', aliases: [], attributes: { category: 'feature-store', lifecycle_stage: 'feature-engineering', hosting: 'open-source', interface: 'library' } },
+    { id: 'tecton', name: 'Tecton', aliases: [], attributes: { category: 'feature-store', lifecycle_stage: 'feature-engineering', hosting: 'managed', interface: 'platform' } },
+    // monitoring
+    { id: 'evidently', name: 'Evidently AI', aliases: ['evidently'], attributes: { category: 'monitoring', lifecycle_stage: 'monitoring', hosting: 'open-source', interface: 'library' } },
+    { id: 'arize', name: 'Arize', aliases: [], attributes: { category: 'monitoring', lifecycle_stage: 'monitoring', hosting: 'managed', interface: 'platform' } },
+    { id: 'whylabs', name: 'WhyLabs', aliases: ['whylogs'], attributes: { category: 'monitoring', lifecycle_stage: 'monitoring', hosting: 'managed', interface: 'platform' } },
+    // labeling
+    { id: 'label-studio', name: 'Label Studio', aliases: [], attributes: { category: 'labeling', lifecycle_stage: 'data-labeling', hosting: 'both', interface: 'platform' } },
+    { id: 'snorkel', name: 'Snorkel', aliases: [], attributes: { category: 'labeling', lifecycle_stage: 'data-labeling', hosting: 'both', interface: 'library' } },
+    // model hub
+    { id: 'hf-hub', name: 'Hugging Face Hub', aliases: ['huggingface', 'hugging face'], attributes: { category: 'model-hub', lifecycle_stage: 'model-training', hosting: 'managed', interface: 'platform' } },
+  ],
+  toolPrompts: [
+    { id: 'tp-mlflow', description: 'You need to log parameters, metrics, and artifacts across hundreds of training runs and compare them in one open-source UI you can self-host.', tool_id: 'mlflow' },
+    { id: 'tp-wandb', description: 'Your team wants a fully-hosted dashboard to track experiments live, with rich interactive charts and shareable reports across the org.', tool_id: 'wandb' },
+    { id: 'tp-pinecone', description: 'You need a fully-managed service to store and run similarity search over 50M embeddings for RAG, with zero infrastructure to operate.', tool_id: 'pinecone' },
+    { id: 'tp-faiss', description: 'You want a fast in-process library to index vectors and run nearest-neighbor search embedded directly inside your Python app.', tool_id: 'faiss' },
+    { id: 'tp-weaviate', description: 'You want an open-source vector database you can self-host (or get as managed cloud) with built-in hybrid keyword + vector search.', tool_id: 'weaviate' },
+    { id: 'tp-mongodb', description: 'You need a flexible document store for semi-structured JSON records that scales horizontally, available open-source or as a managed Atlas service.', tool_id: 'mongodb' },
+    { id: 'tp-postgres', description: 'You need a rock-solid open-source relational database with SQL and strong consistency for your structured training data.', tool_id: 'postgres' },
+    { id: 'tp-redis', description: 'You need a sub-millisecond in-memory store to cache precomputed features for low-latency online serving.', tool_id: 'redis' },
+    { id: 'tp-dvc', description: 'You want to version large datasets and model files alongside Git from the command line, keeping the actual blobs in remote storage.', tool_id: 'dvc' },
+    { id: 'tp-airflow', description: 'You need to schedule and orchestrate complex batch ETL DAGs with retries and a web UI to monitor every run.', tool_id: 'airflow' },
+    { id: 'tp-kubeflow', description: 'You want to run end-to-end ML pipelines on Kubernetes — from training to deployment — using an open-source platform.', tool_id: 'kubeflow' },
+    { id: 'tp-bentoml', description: 'You want an open-source Python library to package a trained model into a production-ready prediction service.', tool_id: 'bentoml' },
+    { id: 'tp-triton', description: 'You need a high-performance inference server that serves models from multiple frameworks on GPUs with dynamic batching.', tool_id: 'triton' },
+    { id: 'tp-ray', description: 'You need to scale Python training and hyperparameter tuning across a cluster with a single open-source distributed framework.', tool_id: 'ray' },
+    { id: 'tp-feast', description: 'You need an open-source feature store to define features once and serve them consistently for both training and online inference.', tool_id: 'feast' },
+    { id: 'tp-evidently', description: 'You want an open-source library to generate data-drift and model-quality reports from your production logs.', tool_id: 'evidently' },
+    { id: 'tp-arize', description: 'You want a managed ML observability platform to monitor drift, performance, and explainability in production.', tool_id: 'arize' },
+    { id: 'tp-label-studio', description: 'Your annotators need a configurable web UI to label images, text, and audio for supervised learning.', tool_id: 'label-studio' },
+    { id: 'tp-snorkel', description: 'You want to programmatically generate training labels with labeling functions instead of hand-annotating everything.', tool_id: 'snorkel' },
+    { id: 'tp-hf-hub', description: 'You want to download pretrained transformer models and share your own fine-tunes on a managed model hub.', tool_id: 'hf-hub' },
+    { id: 'tp-sagemaker', description: 'You want a managed AWS platform that covers training, tuning, and deployment without managing your own servers.', tool_id: 'sagemaker' },
+  ],
 };

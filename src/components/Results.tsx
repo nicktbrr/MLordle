@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { DayResult, RoundOutcome } from '../state/progress';
 import type { DailyStats } from '../data/statsRepository';
 
-const ROUND_LABELS: [keyof Pick<DayResult, 'round1' | 'round2' | 'round3'>, string][] = [
+const ROUND_LABELS: [keyof Pick<DayResult, 'round1' | 'round2' | 'round3' | 'round4'>, string][] = [
   ['round1', 'Pipeline'],
   ['round2', 'Technique'],
   ['round3', 'Diagnosis'],
+  ['round4', 'Tooling'],
 ];
 
 function summaryLine(label: string, o: RoundOutcome): string {
@@ -35,6 +36,7 @@ function CommunityStats({ stats, loading }: { stats: DailyStats | null; loading:
     ['Pipeline', stats.round1_solve_rate, stats.avg_round1_attempts],
     ['Technique', stats.round2_solve_rate, stats.avg_round2_attempts],
     ['Diagnosis', stats.round3_solve_rate, stats.avg_round3_attempts],
+    ['Tooling', stats.round4_solve_rate ?? 0, stats.avg_round4_attempts ?? 0],
   ];
 
   return (
@@ -95,7 +97,7 @@ export default function Results({
     <section className="round results">
       <header className="round__head">
         <span className="round__tag">Done for today</span>
-        <h2>{solvedCount} / 3 rounds solved</h2>
+        <h2>{solvedCount} / {ROUND_LABELS.length} rounds solved</h2>
         {alreadyPlayed && (
           <p className="round__hint">Come back tomorrow for a new puzzle.</p>
         )}

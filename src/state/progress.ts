@@ -11,6 +11,7 @@ export interface DayResult {
   round1: RoundOutcome;
   round2: RoundOutcome;
   round3: RoundOutcome;
+  round4: RoundOutcome;
   completedAt: string;
 }
 

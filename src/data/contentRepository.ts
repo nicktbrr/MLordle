@@ -22,12 +22,31 @@ export class SupabaseContentRepository implements ContentRepository {
       throw new Error(`Supabase content load failed: ${first.error.message}`);
     }
 
+    // Round 4 tooling tables are optional: if they aren't created yet (or are
+    // empty), fall back to the bundled tool content so the round still works.
+    let tools = fallbackContent.tools;
+    let toolPrompts = fallbackContent.toolPrompts;
+    try {
+      const [t, tp] = await Promise.all([
+        supabase.from('tools').select('*'),
+        supabase.from('tool_prompts').select('*'),
+      ]);
+      if (!t.error && !tp.error && t.data?.length && tp.data?.length) {
+        tools = t.data as Content['tools'];
+        toolPrompts = tp.data as Content['toolPrompts'];
+      }
+    } catch {
+      /* keep bundled tool content */
+    }
+
     return {
       stages: stages.data ?? [],
       scenarios: scenarios.data ?? [],
       techniques: techniques.data ?? [],
       causes: causes.data ?? [],
       symptoms: symptoms.data ?? [],
+      tools,
+      toolPrompts,
     } as Content;
   }
 }
