@@ -97,7 +97,7 @@ export function buildDailyPuzzle(content: Content, dateKey: string): DailyPuzzle
   }
 
   const stageById = new Map(stages.map((s) => [s.id, s]));
-  const seed = hashString(dateKey);
+  const seed = hashString(dateKey) >>> 0;
 
   // --- scenario (Round 1) ---
   const scenario = scenarios[seed % scenarios.length];
